@@ -3,7 +3,20 @@
   "name": "whisker",
   "version": "1.0.0",
   "action": {
-    "default_popup": "index.html"
+    "default_icon": {
+      "16": "src/icons/icon.png",
+      "32": "src/icons/icon.png",
+      "48": "src/icons/icon.png",
+      "128": "src/icons/icon.png"
+    },
+    "default_title": "Popup Title",
+    "default_popup": "src/popup/index.html"
+  },
+  "icons": {
+    "16": "src/icons/icon.png",
+    "32": "src/icons/icon.png",
+    "48": "src/icons/icon.png",
+    "128": "src/icons/icon.png"
   },
   "description": "this is my whisker extension",
   "content_scripts": [
