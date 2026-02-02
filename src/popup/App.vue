@@ -1,20 +1,17 @@
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const msg = ref('Hello Whisker!')
-</script>
-
 <template>
-  <div class="container">
-    <h1>{{ msg }}</h1>
-    <p>Welcome to your extension popup.</p>
+  <div class="popup-container">
+    <router-view />
   </div>
 </template>
 
+<script setup lang="ts">
+</script>
+
 <style scoped>
-.container {
-  padding: 20px;
+.popup-container {
+  display: flex;
+  flex-direction: column;
   min-width: 300px;
-  text-align: center;
+  min-height: 480px;
 }
 </style>
