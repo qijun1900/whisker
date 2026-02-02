@@ -14,9 +14,9 @@
 
     <!-- 表单内容 -->
     <div class="form-content">
-      <!-- 供应商名称 -->
+      <!-- 模型名称 -->
       <div class="form-group">
-        <label class="label">供应商名称</label>
+        <label class="label">模型名称</label>
         <input 
           v-model="vendorName"
           type="text" 
@@ -78,6 +78,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { BRAND_COLORS, getRandomColor } from '../../utils/color'
+import { getCurrentTabInfo } from '../../utils/tab'
 
 const router = useRouter()
 
@@ -86,11 +87,18 @@ const websiteUrl = ref('')
 const selectedColor = ref('')
 const colors = BRAND_COLORS
 
-// 页面加载时随机选择一个颜色
-onMounted(() => {
-  selectedColor.value = getRandomColor()
-})
 
+onMounted(async () => {
+  // 页面加载时随机选择一个颜色并获取当前标签页 URL
+  selectedColor.value = getRandomColor()
+  
+  // 获取当前标签页信息
+  const tabInfo = await getCurrentTabInfo()
+  if (tabInfo) {
+    websiteUrl.value = tabInfo.hostname
+    vendorName.value = tabInfo.siteName
+  }
+})
 
 const goBack = () => {
   router.push('/')

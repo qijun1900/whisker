@@ -2,13 +2,13 @@
   <header class="header">
     <div>
       <WInput 
-        @update:model-value="handleSearch" 
         v-model="searchText" 
         placeholder="Search models..."
-        :showSearchIcon="true"
+        :show-search-icon="true"
         :clearable="true"
         shape="round"
         width="280px"
+        @update:model-value="handleSearch"
       />
     </div>
     <div 

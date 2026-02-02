@@ -39,6 +39,7 @@
   "default_path": "src/contentPage/index.html"
 },
 "permissions": [
-  "sidePanel"
+  "sidePanel",
+  "tabs"
 ]
 }
