@@ -8,7 +8,7 @@
         :showSearchIcon="true"
         :clearable="true"
         shape="round"
-        width="240px"
+        width="280px"
       />
     </div>
     <div 

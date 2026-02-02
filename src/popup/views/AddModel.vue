@@ -198,7 +198,7 @@ const handleSave = () => {
 /* 颜色选择器 */
 .color-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   gap: 10px;
   max-width: 200px;
 }

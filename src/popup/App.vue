@@ -11,7 +11,9 @@
 .popup-container {
   display: flex;
   flex-direction: column;
-  min-width: 300px;
-  min-height: 480px;
+  width: 350px;
+  height: 490px;
+  max-height: 490px;
+  overflow: hidden;
 }
 </style>
