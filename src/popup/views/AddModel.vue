@@ -9,7 +9,7 @@
           <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <h1 class="title">添加新模型</h1>
+      <h1 class="title">{{ isEditing ? '编辑模型' : '添加新模型' }}</h1>
     </header>
 
     <!-- 表单内容 -->
@@ -72,8 +72,8 @@
           <polyline points="17 21 17 13 7 13 7 21" stroke-width="2"/>
           <polyline points="7 3 7 8 15 8" stroke-width="2"/>
         </svg>
-        <span v-if="isSaving">保存中...</span>
-        <span v-else>保存</span>
+        <span v-if="isSaving">{{ isEditing ? '保存中...' : '添加中...' }}</span>
+        <span v-else>{{ isEditing ? '保存' : '添加' }}</span>
       </button>
     </div>
   </div>  
@@ -94,6 +94,8 @@ const websiteUrl = ref('')
 const selectedColor = ref('')
 const colors = BRAND_COLORS
 const isSaving = ref(false)
+const isEditing = ref(false)
+const editingId = ref<string | null>(null)
 
 // 错误信息
 const errors = reactive({
@@ -102,14 +104,37 @@ const errors = reactive({
 })
 
 onMounted(async () => {
-  // 页面加载时随机选择一个颜色并获取当前标签页 URL
-  selectedColor.value = getRandomColor()
+  // 先加载数据
+  await vendorStore.loadVendors()
   
-  // 获取当前标签页信息
-  const tabInfo = await getCurrentTabInfo()
-  if (tabInfo) {
-    websiteUrl.value = tabInfo.hostname
-    vendorName.value = tabInfo.siteName
+  // 检查是否是编辑模式
+  const routeId = router.currentRoute.value.query.id as string
+  
+  if (routeId) {
+    // 编辑模式
+    isEditing.value = true
+    editingId.value = routeId
+    
+    const vendor = vendorStore.getVendorById(routeId)
+    
+    if (vendor) {
+      vendorName.value = vendor.vendorName
+      websiteUrl.value = vendor.websiteUrl
+      selectedColor.value = vendor.brandColor
+    } else {
+      // 如果找不到对应的模型，返回首页
+      alert('未找到该模型')
+      goBack()
+    }
+  } else {
+    // 添加模式：随机选择颜色并获取当前标签页信息
+    selectedColor.value = getRandomColor()
+    
+    const tabInfo = await getCurrentTabInfo()
+    if (tabInfo) {
+      websiteUrl.value = tabInfo.hostname
+      vendorName.value = tabInfo.siteName
+    }
   }
 })
 
@@ -149,12 +174,21 @@ const handleSave = async () => {
   isSaving.value = true
   
   try {
-    // 保存到 Pinia Store（会自动持久化到 Chrome Storage）
-    await vendorStore.addVendor({
-      vendorName: vendorName.value.trim(),
-      websiteUrl: websiteUrl.value.trim(),
-      brandColor: selectedColor.value
-    })
+    if (isEditing.value && editingId.value) {
+      // 编辑模式：更新现有模型
+      await vendorStore.updateVendor(editingId.value, {
+        vendorName: vendorName.value.trim(),
+        websiteUrl: websiteUrl.value.trim(),
+        brandColor: selectedColor.value
+      })
+    } else {
+      // 添加模式：创建新模型
+      await vendorStore.addVendor({
+        vendorName: vendorName.value.trim(),
+        websiteUrl: websiteUrl.value.trim(),
+        brandColor: selectedColor.value
+      })
+    }
     
     // 保存成功后返回
     goBack()

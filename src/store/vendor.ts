@@ -17,9 +17,10 @@ export const useVendorStore = defineStore('vendor', () => {
   // Getters
   const vendorCount = computed(() => vendors.value.length)
   
-  const getVendorById = computed(() => {
-    return (id: string) => vendors.value.find(v => v.id === id)
-  })
+  // 改为普通函数，不使用 computed
+  function getVendorById(id: string) {
+    return vendors.value.find(v => v.id === id)
+  }
 
   // Actions
   // 从 Chrome Storage 加载数据
@@ -55,7 +56,7 @@ export const useVendorStore = defineStore('vendor', () => {
       
       // 转换为普通数组（去除 Vue 响应式代理）
       const plainVendors = JSON.parse(JSON.stringify(vendors.value))
-      await chrome.storage.local.set({ vendors: plainVendors })
+      await chrome.storage.local.set({ vendors: plainVendors })//({key: 'vendors', value: plainVendors })
     } catch (error) {
       console.error('保存模型列表失败:', error)
       throw error

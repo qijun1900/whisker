@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
+import router from '../router'
 import PopupHeader from '../components/PopupHeader.vue'
 import PopupContent from '../components/PopupContent.vue'
 import PopupFooter from '../components/PopupFooter.vue'
@@ -31,6 +32,7 @@ import VendorItem from '../../components/VendorItem.vue'
 import { useVendorStore } from '../../store/vendor'
 
 const vendorStore = useVendorStore()
+
 
 // 使用 computed 获取响应式数据
 const vendors = computed(() => 
@@ -48,7 +50,8 @@ onMounted(async () => {
 })
 
 const handleEdit = (id: string) => {
-  console.log('Edit vendor:', id)
+  // 跳转到编辑页面，通过 query 参数传递 id
+  router.push({ path: '/add', query: { id } })
 }
 
 const handleDelete = async (id: string) => {
