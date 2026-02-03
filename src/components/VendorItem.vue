@@ -1,5 +1,5 @@
 <template>
-  <div class="vendor-item">
+  <div class="vendor-item" @click="handleOpen">
     <!-- 左侧：图标和信息 -->
     <div class="vendor-info">
       <div class="vendor-icon" :style="{ backgroundColor: color }">
@@ -26,11 +26,10 @@
         </svg>
       </button>
       <div class="more-menu-wrapper">
-        <button class="action-btn" @click="toggleMenu" title="更多操作">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="12" cy="12" r="1" stroke-width="2"/>
-            <circle cx="12" cy="5" r="1" stroke-width="2"/>
-            <circle cx="12" cy="19" r="1" stroke-width="2"/>
+        <button class="action-btn" @click="handleCheck" title="查看对话">
+          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 36C35.0457 36 44 24 44 24C44 24 35.0457 12 24 12C12.9543 12 4 24 4 24C4 24 12.9543 36 24 36Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M24 29C26.7614 29 29 26.7614 29 24C29 21.2386 26.7614 19 24 19C21.2386 19 19 21.2386 19 24C19 26.7614 21.2386 29 24 29Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
           </svg>
         </button>
         
@@ -43,7 +42,7 @@
             </svg>
             复制链接
           </button>
-          <button class="menu-item" @click="handleOpen">
+          <button class="menu-item" >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <polyline points="15 3 21 3 21 9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -77,7 +76,7 @@ interface Props {
   initial?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), { /* 默认首字母取 name 的第一个字母 */
   initial: ''
 })
 
@@ -86,6 +85,8 @@ interface Emits {
   (e: 'edit'): void
   /** 点击删除按钮时触发 */
   (e: 'delete'): void
+  /** 点击查看对话时触发 */
+  (e: 'check'): void
   /** 点击复制链接时触发 */
   (e: 'copy'): void
   /** 点击打开网站时触发 */
@@ -102,6 +103,10 @@ const initial = props.initial || props.name.charAt(0).toUpperCase()
 // 更多菜单状态
 const showMenu = ref(false)
 
+const handleOpen = () => {
+  emit('open')
+}
+
 const handleEdit = () => {
   emit('edit')
 }
@@ -110,8 +115,8 @@ const handleDelete = () => {
   emit('delete')
 }
 
-const toggleMenu = () => {
-  showMenu.value = !showMenu.value
+const handleCheck = () => {
+  emit('check')
 }
 
 const handleCopy = () => {
@@ -119,10 +124,6 @@ const handleCopy = () => {
   showMenu.value = false
 }
 
-const handleOpen = () => {
-  emit('open')
-  showMenu.value = false
-}
 
 const handleFavorite = () => {
   emit('favorite')
@@ -233,8 +234,8 @@ onUnmounted(() => {
 }
 
 .action-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   stroke: #6b7280;
 }
 

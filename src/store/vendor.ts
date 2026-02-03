@@ -17,7 +17,6 @@ export const useVendorStore = defineStore('vendor', () => {
   // Getters
   const vendorCount = computed(() => vendors.value.length)
   
-  // 改为普通函数，不使用 computed
   function getVendorById(id: string) {
     return vendors.value.find(v => v.id === id)
   }

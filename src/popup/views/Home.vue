@@ -10,11 +10,10 @@
           :name="vendor.name"
           :url="vendor.url"
           :color="vendor.color"
+          @open="handleOpen(vendor.id)"
           @edit="handleEdit(vendor.id)"
           @delete="handleDelete(vendor.id)"
-          @copy="handleCopy(vendor.id)"
-          @open="handleOpen(vendor.id)"
-          @favorite="handleFavorite(vendor.id)"
+          @check="handleCheck(vendor.id)"
         />
       </div>
     </PopupContent>
@@ -49,33 +48,38 @@ onMounted(async () => {
   await vendorStore.loadVendors()
 })
 
+// 编辑模型
 const handleEdit = (id: string) => {
   // 跳转到编辑页面，通过 query 参数传递 id
-  router.push({ path: '/add', query: { id } })
+  router.push({ 
+    path: '/add', query: { id } 
+  })
 }
 
+// 删除模型
 const handleDelete = async (id: string) => {
   if (confirm('确定要删除这个模型吗？')) {
     await vendorStore.removeVendor(id)
   }
 }
 
-const handleCopy = (id: string) => {
-  const vendor = vendorStore.getVendorById(id)
-  if (vendor) {
-    navigator.clipboard.writeText(vendor.websiteUrl)
-  }
-}
-
+// 打开网站
 const handleOpen = (id: string) => {
   const vendor = vendorStore.getVendorById(id)
   if (vendor) {
-    window.open(vendor.websiteUrl, '_blank')
+    // 确保 URL 包含协议
+    let url = vendor.websiteUrl
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url
+    }
+    // 在新标签页打开
+    window.open(url, '_blank')
   }
 }
 
-const handleFavorite = (id: string) => {
-  console.log('Favorite vendor:', id)
+// 查看对话
+const handleCheck = (id: string) => {
+ console.log('查看对话模型ID：', id)
 }
 </script>
 
