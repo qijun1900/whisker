@@ -30,13 +30,21 @@ import {ref} from 'vue';
 import WInput from '../../components/WInput.vue';
 import { useRouter } from 'vue-router'
 
-const searchText = ref<string>('');
-
-const handleSearch = (value:string)=>{
-  console.log(value)
+interface Emits {
+  /** 搜索输入变化时触发 */
+  (e: 'search', value: string): void
 }
 
 const router = useRouter()
+const searchText = ref<string>('');
+
+// 定义 emit
+const emit = defineEmits<Emits>()
+
+const handleSearch = (value: string) => {
+  // 向父组件发送搜索事件
+  emit('search', value)
+}
 
 const handleGoAdd = () => {
   router.push('/add')
