@@ -20,3 +20,25 @@ console.log('this is background service worker file')
     定时任务
     消息通信中心
  */
+
+/**
+ *  监听来自 popup 的消息打开侧边栏
+ * 优点：更稳定，不受 popup 关闭影响
+ */
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.action === 'openSidePanel') {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      const tab = tabs[0]
+      if (tab?.windowId) {
+        try {
+          await chrome.sidePanel.open({ windowId: tab.windowId })
+          sendResponse({ success: true })
+        } catch (error) {
+          console.error('打开侧边栏失败:', error)
+          sendResponse({ success: false, error: String(error) })
+        }
+      }
+    })
+    return true // 保持消息通道开启以支持异步响应
+  }
+})

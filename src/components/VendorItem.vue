@@ -130,7 +130,7 @@ const handleFavorite = () => {
 }
 
 // 点击外部关闭菜单
-const handleClickOutside = (event: MouseEvent) => {
+const handleClickOutside = (_event: MouseEvent) => {
   if (showMenu.value) {
     showMenu.value = false
   }

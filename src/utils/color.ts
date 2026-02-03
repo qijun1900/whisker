@@ -2,7 +2,7 @@
  * 品牌颜色列表
  * 用于 Vendor 的品牌色选择
  */
-export const BRAND_COLORS = [
+export const BRAND_COLORS: readonly string[] = [
   '#3B82F6', // 蓝色
   '#10B981', // 绿色
   '#EF4444', // 红色
@@ -22,7 +22,7 @@ export const BRAND_COLORS = [
   '#F43F5E' , // 珊瑚红
   '#8E24AA', // 紫红
   '#3949AB', // 靛蓝色
-]
+] as const
 
 /**
  * 从颜色列表中随机选择一个颜色
@@ -33,7 +33,7 @@ export const BRAND_COLORS = [
  * const randomColor = getRandomColor()
  * console.log(randomColor) // '#3B82F6'
  */
-export function getRandomColor(colors: string[] = BRAND_COLORS): string {
+export function getRandomColor(colors: readonly string[] = BRAND_COLORS): string {
   const randomIndex = Math.floor(Math.random() * colors.length)
-  return colors[randomIndex]
+  return colors[randomIndex] || '#3B82F6'
 }

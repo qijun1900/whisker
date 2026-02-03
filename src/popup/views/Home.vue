@@ -23,120 +23,55 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, computed } from 'vue'
 import PopupHeader from '../components/PopupHeader.vue'
 import PopupContent from '../components/PopupContent.vue'
 import PopupFooter from '../components/PopupFooter.vue'
 import VendorItem from '../../components/VendorItem.vue'
+import { useVendorStore } from '../../store/vendor'
 
-interface Vendor {
-  id: number
-  name: string
-  url: string
-  color: string
-}
+const vendorStore = useVendorStore()
 
-// 示例数据
-const vendors = ref<Vendor[]>([
-  {
-    id: 1,
-    name: 'ChatGPT',
-    url: 'chat.openai.com',
-    color: '#10B981'
-  },
-  {
-    id: 2,
-    name: 'Claude',
-    url: 'claude.ai',
-    color: '#F59E0B'
-  },
-  {
-    id: 3,
-    name: 'Gemini',
-    url: 'gemini.google.com',
-    color: '#3B82F6'
-  },
-  {
-    id: 4,
-    name: 'Midjourney',
-    url: 'www.midjourney.com',
-    color: '#475569'
-  },
-  {
-    id: 5,
-    name: 'DeepSeek',
-    url: 'chat.deepseek.com',
-    color: '#6366F1'
-  },
-  {
-    id: 6,
-    name: 'Perplexity',
-    url: 'www.perplexity.ai',
-    color: '#14B8A6'
-  },
-  {
-    id: 7,
-    name: 'Copilot',
-    url: 'copilot.microsoft.com',
-    color: '#0EA5E9'
-  },
-  {
-    id: 8,
-    name: 'Llama',
-    url: 'www.llama.com',
-    color: '#8B5CF6'
-  },
-  {
-    id: 9,
-    name: 'Cohere',
-    url: 'cohere.com',
-    color: '#EC4899'
-  },
-  {
-    id: 10,
-    name: 'Mistral',
-    url: 'mistral.ai',
-    color: '#F97316'
-  },
-  {
-    id: 11,
-    name: 'Anthropic',
-    url: 'www.anthropic.com',
-    color: '#EAB308'
-  },
-  {
-    id: 12,
-    name: 'Hugging Face',
-    url: 'huggingface.co',
-    color: '#22C55E'
-  }
-])
+// 使用 computed 获取响应式数据
+const vendors = computed(() => 
+  vendorStore.vendors.map(v => ({
+    id: v.id,
+    name: v.vendorName,
+    url: v.websiteUrl.replace(/^https?:\/\//, ''), 
+    color: v.brandColor
+  }))
+)
 
-const handleEdit = (id: number) => {
+// 页面加载时从 Chrome Storage 加载数据
+onMounted(async () => {
+  await vendorStore.loadVendors()
+})
+
+const handleEdit = (id: string) => {
   console.log('Edit vendor:', id)
 }
 
-const handleDelete = (id: number) => {
-  console.log('Delete vendor:', id)
-  vendors.value = vendors.value.filter(v => v.id !== id)
-}
-
-const handleCopy = (id: number) => {
-  const vendor = vendors.value.find(v => v.id === id)
-  if (vendor) {
-    navigator.clipboard.writeText(`https://${vendor.url}`)
-    console.log('Copied:', vendor.url)
+const handleDelete = async (id: string) => {
+  if (confirm('确定要删除这个模型吗？')) {
+    await vendorStore.removeVendor(id)
   }
 }
 
-const handleOpen = (id: number) => {
-  const vendor = vendors.value.find(v => v.id === id)
+const handleCopy = (id: string) => {
+  const vendor = vendorStore.getVendorById(id)
   if (vendor) {
-    window.open(`https://${vendor.url}`, '_blank')
+    navigator.clipboard.writeText(vendor.websiteUrl)
   }
 }
 
-const handleFavorite = (id: number) => {
+const handleOpen = (id: string) => {
+  const vendor = vendorStore.getVendorById(id)
+  if (vendor) {
+    window.open(vendor.websiteUrl, '_blank')
+  }
+}
+
+const handleFavorite = (id: string) => {
   console.log('Favorite vendor:', id)
 }
 </script>

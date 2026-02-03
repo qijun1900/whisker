@@ -20,9 +20,11 @@
         <input 
           v-model="vendorName"
           type="text" 
-          class="input" 
+          class="input"
+          :class="{ 'input-error': errors.vendorName }"
           placeholder="e.g. OpenAI"
         />
+        <span v-if="errors.vendorName" class="error-message">{{ errors.vendorName }}</span>
       </div>
 
       <!-- 网站网址 -->
@@ -31,9 +33,11 @@
         <input 
           v-model="websiteUrl"
           type="url" 
-          class="input" 
+          class="input"
+          :class="{ 'input-error': errors.websiteUrl }"
           placeholder="https://chat.openai.com"
         />
+        <span v-if="errors.websiteUrl" class="error-message">{{ errors.websiteUrl }}</span>
       </div>
 
       <!-- 图标颜色 --> 
@@ -62,31 +66,40 @@
 
     <!-- 保存按钮 -->
     <div class="footer">
-      <button class="save-btn" @click="handleSave">
-        <svg class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <button class="save-btn" @click="handleSave" :disabled="isSaving">
+        <svg v-if="!isSaving" class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke-width="2"/>
           <polyline points="17 21 17 13 7 13 7 21" stroke-width="2"/>
           <polyline points="7 3 7 8 15 8" stroke-width="2"/>
         </svg>
-        保存
+        <span v-if="isSaving">保存中...</span>
+        <span v-else>保存</span>
       </button>
     </div>
   </div>  
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { BRAND_COLORS, getRandomColor } from '../../utils/color'
 import { getCurrentTabInfo } from '../../utils/tab'
+import { useVendorStore } from '../../store/vendor'
 
 const router = useRouter()
+const vendorStore = useVendorStore()
 
 const vendorName = ref('')
 const websiteUrl = ref('')
 const selectedColor = ref('')
 const colors = BRAND_COLORS
+const isSaving = ref(false)
 
+// 错误信息
+const errors = reactive({
+  vendorName: '',
+  websiteUrl: ''
+})
 
 onMounted(async () => {
   // 页面加载时随机选择一个颜色并获取当前标签页 URL
@@ -104,14 +117,53 @@ const goBack = () => {
   router.push('/')
 }
 
-const handleSave = () => {
-  console.log({
-    vendorName: vendorName.value,
-    websiteUrl: websiteUrl.value,
-    brandColor: selectedColor.value
-  })
-  // 保存后返回
-  goBack()
+// 验证表单
+const validateForm = (): boolean => {
+  // 清空之前的错误
+  errors.vendorName = ''
+  errors.websiteUrl = ''
+  
+  let isValid = true
+  
+  // 验证模型名称
+  if (!vendorName.value.trim()) {
+    errors.vendorName = '请输入模型名称'
+    isValid = false
+  }
+  
+  // 验证网站网址
+  if (!websiteUrl.value.trim()) {
+    errors.websiteUrl = '请输入网站网址'
+    isValid = false
+  }
+  
+  return isValid
+}
+
+const handleSave = async () => {
+  // 验证表单
+  if (!validateForm()) {
+    return
+  }
+  
+  isSaving.value = true
+  
+  try {
+    // 保存到 Pinia Store（会自动持久化到 Chrome Storage）
+    await vendorStore.addVendor({
+      vendorName: vendorName.value.trim(),
+      websiteUrl: websiteUrl.value.trim(),
+      brandColor: selectedColor.value
+    })
+    
+    // 保存成功后返回
+    goBack()
+  } catch (error) {
+    console.error('保存失败:', error)
+    alert(`保存失败: ${error instanceof Error ? error.message : '未知错误'}`)
+  } finally {
+    isSaving.value = false
+  }
 }
 </script>
 
@@ -203,6 +255,21 @@ const handleSave = () => {
   color: #9ca3af;
 }
 
+.input-error {
+  border-color: #EF4444;
+}
+
+.input-error:focus {
+  border-color: #DC2626;
+}
+
+.error-message {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #EF4444;
+}
+
 /* 颜色选择器 */
 .color-grid {
   display: grid;
@@ -267,6 +334,11 @@ const handleSave = () => {
 
 .save-btn:active {
   transform: scale(0.98);
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .save-icon {
