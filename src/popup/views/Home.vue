@@ -18,7 +18,6 @@
         />
       </div>
     </PopupContent>
-
     <PopupFooter />
   </div>
 </template>
