@@ -56,10 +56,17 @@ export function useVendorActions() {
     if (vendor) {
       try {
         // 发送消息给 background 打开侧边栏并传递 id
-        await chrome.runtime.sendMessage({
+        const response = await chrome.runtime.sendMessage({
           action: 'openSidePanel',
           vendorId: id
         })
+        
+        if (response?.success) {
+          //关闭popup窗口
+          window.close()
+        } else {
+          console.error('打开侧边栏失败:', response?.error)
+        }
       } catch (error) {
         console.error('发送消息失败:', error)
       }
