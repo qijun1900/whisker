@@ -16,9 +16,12 @@
           @check="handleCheck(vendor.id)"
         />
       </div>
-      <div v-else class="empty-state">
-        <p>{{ searchQuery ? '未找到匹配的模型' : '暂无模型，点击右上角添加' }}</p>
-      </div>
+      <Empty 
+        v-else
+        :text="searchQuery ? '未找到匹配的模型' : '暂无添加'"
+        :description="searchQuery ? '试试其他关键词' : '点击右上角添加'"
+        :animated="searchQuery ? false :true"
+      />
     </PopupContent>
     <PopupFooter />
   </div>
@@ -30,6 +33,7 @@ import PopupHeader from '../components/PopupHeader.vue'
 import PopupContent from '../components/PopupContent.vue'
 import PopupFooter from '../components/PopupFooter.vue'
 import VendorItem from '../../components/VendorItem.vue'
+import Empty from '../../components/Empty.vue'
 import { useVendorActions } from '../../composables/useVendorActions'
 import { useVendorList } from '../../composables/useVendorList'
 
@@ -67,15 +71,5 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  color: #9ca3af;
-  font-size: 14px;
-  text-align: center;
 }
 </style>
