@@ -1,5 +1,6 @@
 import { getRandomColor } from '../utils/color'
 import { extractSiteName } from '../utils/tab'
+import { getFaviconFromTab } from '../utils/favicon'
 
 console.log("Whisker background service worker started")
 
@@ -36,7 +37,7 @@ chrome.runtime.onInstalled.addListener(() => {
 /**
  * 处理右键菜单点击事件
  */
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   switch (info.menuItemId) {
     case "open-sidebar":
       // 打开侧边栏
@@ -50,13 +51,16 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       
     case "open-add-url":
       // 添加当前网站
-      if (tab?.url && tab?.title) {
+      if (tab?.url && tab?.title && tab?.id) {
         try {
           const url = new URL(tab.url)
           const hostname = url.hostname
           
           // 使用工具函数提取网站名称
           const siteName = extractSiteName(hostname)
+          
+          // 获取 favicon
+          const faviconUrl = await getFaviconFromTab(tab.id)
           
           // 获取当前存储的模型列表
           chrome.storage.local.get('vendors', (result) => {
@@ -89,7 +93,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
               id: `vendor_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
               vendorName: siteName,
               websiteUrl: url.origin,
-              brandColor: getRandomColor(), // 使用随机颜色
+              brandColor: getRandomColor(), // 使用随机颜色（作为备用）
+              faviconUrl: faviconUrl, // 添加 favicon URL
               createdAt: Date.now()
             }
             
@@ -98,11 +103,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             // 保存到 Chrome Storage
             chrome.storage.local.set({ vendors }, () => {
               // 显示成功提示
+              const iconType = faviconUrl ? '使用网站图标' : '使用字母图标'
               chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'public/icons/icon48.png',
                 title: 'Whisker',
-                message: `✅ 已添加 ${siteName} 到列表`,
+                message: `✅ 已添加 ${siteName} (${iconType})`,
                 priority: 1
               })
             })

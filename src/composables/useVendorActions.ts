@@ -25,7 +25,7 @@ export function useVendorActions() {
    * @param id 模型ID
    */
   const handleDelete = async (id: string) => {
-    if (confirm('确定要删除这个模型吗？')) {
+    if (confirm('确定要删除这个网站吗？')) {
       await vendorStore.removeVendor(id)
     }
   }
