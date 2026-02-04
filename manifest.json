@@ -41,6 +41,8 @@
 "permissions": [
   "sidePanel",
   "tabs",
-  "storage"
+  "storage",
+  "contextMenus",
+  "notifications"
 ]
 }
