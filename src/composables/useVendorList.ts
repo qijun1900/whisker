@@ -8,7 +8,7 @@ import { useVendorStore } from '../store/vendor'
 export function useVendorList() {
   const vendorStore = useVendorStore()
   const searchQuery = ref('')
-
+  
   /**
    * 格式化后的模型列表
    * 将 store 中的数据转换为视图需要的格式
@@ -18,7 +18,8 @@ export function useVendorList() {
       id: v.id,
       name: v.vendorName,
       url: v.websiteUrl.replace(/^https?:\/\//, ''), 
-      color: v.brandColor
+      color: v.brandColor,
+      faviconUrl: v.faviconUrl  // 添加 faviconUrl
     }))
   )
 
@@ -33,8 +34,7 @@ export function useVendorList() {
     
     const query = searchQuery.value.toLowerCase()
     return vendors.value.filter(vendor => 
-      vendor.name.toLowerCase().includes(query) ||
-      vendor.url.toLowerCase().includes(query)
+      vendor.name.toLowerCase().includes(query)
     )
   })
 

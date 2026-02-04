@@ -40,25 +40,55 @@
         <span v-if="errors.websiteUrl" class="error-message">{{ errors.websiteUrl }}</span>
       </div>
 
-      <!-- 图标颜色 --> 
+      <!-- 图标选择 -->
       <div class="form-group">
-        <label class="label">图标颜色</label>
-        <div class="color-grid">
-          <div 
-            v-for="color in colors" 
-            :key="color"
-            class="color-item"
-            :class="{ active: selectedColor === color }"
-            :style="{ backgroundColor: color }"
-            @click="selectedColor = color"
+        <label class="label">图标</label>
+        
+        <!-- 如果有 favicon，显示预览和切换选项 -->
+        <div v-if="faviconUrl" class="icon-preview-section">
+          <div class="icon-preview">
+            <div class="preview-icon" :style="{ backgroundColor: useFavicon ? '#f3f4f6' : selectedColor }">
+              <img v-if="useFavicon" :src="faviconUrl" alt="favicon" class="favicon-preview" />
+              <span v-else class="initial-preview">{{ vendorName.charAt(0).toUpperCase() || '?' }}</span>
+            </div>
+            <div class="preview-info">
+              <p class="preview-title">{{ useFavicon ? '网站图标' : '字母图标' }}</p>
+              <p class="preview-desc">{{ useFavicon ? '使用网站原始图标' : '使用首字母和颜色' }}</p>
+            </div>
+          </div>
+          
+          <button 
+            type="button"
+            class="toggle-icon-btn" 
+            @click="useFavicon = !useFavicon"
           >
-            <svg 
-              v-if="selectedColor === color" 
-              class="check-icon" 
-              viewBox="0 0 24 24" 
-              fill="none" stroke="white">
-              <path d="M20 6L9 17l-5-5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
+            切换为{{ useFavicon ? '字母图标' : '网站图标' }}
+          </button>
+        </div>
+
+        <!-- 如果没有 favicon 或选择不使用，显示颜色选择器 -->
+        <div v-if="!faviconUrl || !useFavicon" class="color-section">
+          <p class="color-label">选择图标颜色</p>
+          <div class="color-grid">
+            <div 
+              v-for="color in colors" 
+              :key="color"
+              class="color-item"
+              :class="{ active: selectedColor === color }"
+              :style="{ backgroundColor: color }"
+              @click="selectedColor = color"
+            >
+              <svg 
+                v-if="selectedColor === color" 
+                class="check-icon" 
+                viewBox="0 0 24 24" 
+                fill="none" stroke="white">
+                <path d="M20 6L9 17l-5-5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -85,6 +115,7 @@ import { useRouter } from 'vue-router'
 import { BRAND_COLORS, getRandomColor } from '../../utils/color'
 import { getCurrentTabInfo } from '../../utils/tab'
 import { useVendorStore } from '../../store/vendor'
+import {getFaviconFromActiveTab}  from '../../utils/favicon'
 
 const router = useRouter()
 const vendorStore = useVendorStore()
@@ -92,6 +123,8 @@ const vendorStore = useVendorStore()
 const vendorName = ref('')
 const websiteUrl = ref('')
 const selectedColor = ref('')
+const faviconUrl = ref<string | undefined>(undefined)  // 新增：存储 favicon URL
+const useFavicon = ref(true)  // 新增：是否使用 favicon
 const colors = BRAND_COLORS
 const isSaving = ref(false)
 const isEditing = ref(false)
@@ -121,6 +154,8 @@ onMounted(async () => {
       vendorName.value = vendor.vendorName
       websiteUrl.value = vendor.websiteUrl
       selectedColor.value = vendor.brandColor
+      faviconUrl.value = vendor.faviconUrl  // 加载已保存的 favicon
+      useFavicon.value = !!vendor.faviconUrl  // 如果有 favicon 则默认使用
     } else {
       // 如果找不到对应的模型，返回首页
       alert('未找到该模型')
@@ -134,6 +169,15 @@ onMounted(async () => {
     if (tabInfo) {
       websiteUrl.value = tabInfo.hostname
       vendorName.value = tabInfo.siteName
+    }
+    
+    // 获取当前标签页的 favicon
+    const favicon = await getFaviconFromActiveTab()
+    if (favicon) {
+      faviconUrl.value = favicon
+      useFavicon.value = true  // 如果获取到 favicon，默认使用
+    } else {
+      useFavicon.value = false  // 没有 favicon，使用颜色
     }
   }
 })
@@ -174,19 +218,24 @@ const handleSave = async () => {
   isSaving.value = true
   
   try {
+    // 根据用户选择决定是否保存 favicon
+    const finalFaviconUrl = useFavicon.value ? faviconUrl.value : undefined
+    
     if (isEditing.value && editingId.value) {
       // 编辑模式：更新现有模型
       await vendorStore.updateVendor(editingId.value, {
         vendorName: vendorName.value.trim(),
         websiteUrl: websiteUrl.value.trim(),
-        brandColor: selectedColor.value
+        brandColor: selectedColor.value,
+        faviconUrl: finalFaviconUrl  // 保存 favicon（如果用户选择使用）
       })
     } else {
       // 添加模式：创建新模型
       await vendorStore.addVendor({
         vendorName: vendorName.value.trim(),
         websiteUrl: websiteUrl.value.trim(),
-        brandColor: selectedColor.value
+        brandColor: selectedColor.value,
+        faviconUrl: finalFaviconUrl  // 保存 favicon（如果用户选择使用）
       })
     }
     
@@ -305,11 +354,21 @@ const handleSave = async () => {
 }
 
 /* 颜色选择器 */
+.color-section {
+  margin-top: 12px;
+}
+
+.color-label {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
 .color-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
-  max-width: 200px;
+  max-width: 280px;
 }
 
 .color-item {
@@ -336,6 +395,91 @@ const handleSave = async () => {
   width: 18px;
   height: 18px;
   stroke-width: 3;
+}
+
+/* 图标预览区域 */
+.icon-preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.icon-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.preview-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.favicon-preview {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}
+
+.initial-preview {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+}
+
+.preview-info {
+  flex: 1;
+}
+
+.preview-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.preview-desc {
+  margin: 2px 0 0 0;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.toggle-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3B82F6;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-icon-btn:hover {
+  background: #f9fafb;
+  border-color: #3B82F6;
+}
+
+.toggle-icon-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
 }
 
 /* 底部按钮 */

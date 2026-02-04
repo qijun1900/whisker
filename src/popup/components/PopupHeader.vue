@@ -3,7 +3,7 @@
     <div>
       <WInput 
         v-model="searchText" 
-        placeholder="Search models..."
+        placeholder="Search ..."
         :show-search-icon="true"
         :clearable="true"
         shape="round"

@@ -10,6 +10,7 @@
           :name="vendor.name"
           :url="vendor.url"
           :color="vendor.color"
+          :favicon-url="vendor.faviconUrl"
           @open="handleOpen(vendor.id)"
           @edit="handleEdit(vendor.id)"
           @delete="handleDelete(vendor.id)"

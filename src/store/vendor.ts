@@ -6,6 +6,7 @@ export interface Vendor {
   vendorName: string
   websiteUrl: string
   brandColor: string
+  faviconUrl?: string  // 新增：网站图标 URL
   createdAt: number
 }
 

@@ -2,9 +2,10 @@
   <div class="vendor-item" @click="handleOpen">
     <!-- 左侧：图标和信息 -->
     <div class="vendor-info">
-      <div class="vendor-icon" :style="{ backgroundColor: color }">
-        {{ initial }}
-      </div>
+      <VendorIcon 
+        :text="initial" 
+        :color="color" 
+        :favicon-url="faviconUrl" />
       <div class="vendor-details">
         <h3 class="vendor-name">{{ name }}</h3>
         <p class="vendor-url">{{ url }}</p>
@@ -33,7 +34,7 @@
           </svg>
         </button>
         
-        <!-- 下拉菜单 -->
+        <!-- 下拉菜单暂时没有显示 -->
         <div v-if="showMenu" class="more-menu" @click.stop>
           <button class="menu-item" @click="handleCopy">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -64,6 +65,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import VendorIcon from './VendorIcon.vue'
 
 interface Props {
   /** Vendor 名称 */
@@ -74,6 +76,8 @@ interface Props {
   color: string
   /** 图标首字母（可选，默认取 name 的第一个字母） */
   initial?: string
+  /** Favicon URL（可选） */
+  faviconUrl?: string
 }
 
 const props = withDefaults(defineProps<Props>(), { /* 默认首字母取 name 的第一个字母 */
@@ -170,19 +174,6 @@ onUnmounted(() => {
   gap: 12px;
   flex: 1;
   min-width: 0;
-}
-
-.vendor-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 600;
-  color: white;
-  flex-shrink: 0;
 }
 
 .vendor-details {
