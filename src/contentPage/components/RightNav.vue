@@ -12,7 +12,8 @@
         <div class="nav-item-content">
           <VendorIcon 
             :text="item.icon" 
-            :color="item.color || '#42b983'" 
+            :color="item.color" 
+            :favicon-url="item.faviconUrl"
             size="medium" 
           />
           <span class="nav-label">{{ item.title }}</span>
@@ -23,58 +24,58 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import VendorIcon from '../../components/VendorIcon.vue'
+import { useVendorStore } from '../../store/vendor'
 
 export interface NavItem {
-  id: number
+  id: string
   icon: string
   title: string
-  color?: string
+  color: string
+  faviconUrl?: string
 }
 
 interface Props {
-  items?: NavItem[]
-  defaultActive?: number
+  defaultActive?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  items: () => [
-    { id: 1, icon: 'H', title: '首页', color: '#3b82f6' },
-    { id: 2, icon: 'N', title: '笔记', color: '#8b5cf6' },
-    { id: 3, icon: 'F', title: '文件', color: '#ec4899' },
-    { id: 4, icon: 'S', title: '收藏', color: '#f59e0b' },
-    { id: 5, icon: 'T', title: '标签', color: '#10b981' },
-    { id: 6, icon: 'C', title: '统计', color: '#06b6d4' },
-    { id: 7, icon: 'G', title: '设置', color: '#6366f1' },
-    { id: 8, icon: 'B', title: '通知', color: '#ef4444' },
-    { id: 9, icon: 'U', title: '用户', color: '#14b8a6' },
-    { id: 10, icon: 'M', title: '消息', color: '#f97316' },
-    { id: 11, icon: 'Q', title: '搜索', color: '#84cc16' },
-    { id: 12, icon: 'R', title: '日历', color: '#a855f7' },
-    { id: 13, icon: 'P', title: '相册', color: '#ec4899' },
-    { id: 14, icon: 'Y', title: '音乐', color: '#f43f5e' },
-    { id: 15, icon: 'V', title: '视频', color: '#0ea5e9' },
-    { id: 16, icon: 'W', title: '购物', color: '#22c55e' },
-    { id: 17, icon: 'L', title: '灵感', color: '#eab308' },
-    { id: 18, icon: 'K', title: '分类', color: '#8b5cf6' },
-    { id: 19, icon: 'D', title: '钉住', color: '#ef4444' },
-    { id: 20, icon: 'A', title: '快速访问', color: '#06b6d4' },
-  ],
-  defaultActive: 1
+  defaultActive: ''
 })
 
 const emit = defineEmits<{
   navClick: [item: NavItem]
 }>()
 
-const navItems = ref(props.items)
+const vendorStore = useVendorStore()
 const activeItem = ref(props.defaultActive)
+
+// 从 store 加载导航项
+const navItems = computed(() => 
+  vendorStore.vendors.map(v => ({
+    id: v.id,
+    icon: v.vendorName.charAt(0).toUpperCase(), // 使用首字母
+    title: v.vendorName,
+    color: v.brandColor,
+    faviconUrl: v.faviconUrl
+  }))
+)
 
 const handleNavClick = (item: NavItem) => {
   activeItem.value = item.id
   emit('navClick', item)
 }
+
+// 加载数据
+onMounted(async () => {
+  await vendorStore.loadVendors()
+  
+  // 如果没有设置默认激活项，激活第一个
+  if (!activeItem.value && navItems.value.length > 0) {
+    activeItem.value = navItems.value[0]?.id || ''
+  }
+})
 </script>
 
 <style scoped>
@@ -116,7 +117,7 @@ const handleNavClick = (item: NavItem) => {
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  padding: 9px 0;
+  padding: 10px 0;
 }
 
 .nav-item-content {
@@ -142,7 +143,7 @@ const handleNavClick = (item: NavItem) => {
   transform: translateY(-50%);
   width: 3px;
   height: 40px;
-  background: #42b983;
+  background: #cda63b;
   border-radius: 0 2px 2px 0;
 }
 
@@ -152,5 +153,8 @@ const handleNavClick = (item: NavItem) => {
   user-select: none;
   text-align: center;
   line-height: 1;
+  max-width: 50px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

@@ -2,11 +2,10 @@
   <div class="home">
     <div class="content">
       <h1>{{ msg }}</h1>
-      <p>这是侧边栏内容页面</p>
     </div>
     
     <RightNav 
-    @nav-click="handleNavClick" />
+      @nav-click="handleNavClick" />
   </div>
 </template>
 
@@ -14,11 +13,14 @@
 import { ref } from 'vue'
 import RightNav, { type NavItem } from '../components/RightNav.vue'
 
-const msg = ref('Content Page')
+const msg = ref('')
 
 const handleNavClick = (item: NavItem) => {
   console.log('导航项点击:', item)
+  msg.value = `你点击了 ${item.title} 导航项`
 }
+
+
 </script>
 
 <style scoped>
