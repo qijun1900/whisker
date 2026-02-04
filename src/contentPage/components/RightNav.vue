@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import VendorIcon from '../../components/VendorIcon.vue'
 import { useVendorStore } from '../../store/vendor'
 
@@ -38,18 +38,28 @@ export interface NavItem {
 
 interface Props {
   defaultActive?: string
+  modelValue?: string  // 新增：支持 v-model
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  defaultActive: ''
+  defaultActive: '',
+  modelValue: ''
 })
 
 const emit = defineEmits<{
   navClick: [item: NavItem]
+  'update:modelValue': [id: string]  // 新增：支持 v-model
 }>()
 
 const vendorStore = useVendorStore()
-const activeItem = ref(props.defaultActive)
+const activeItem = ref(props.defaultActive || props.modelValue)
+
+// 监听外部传入的 modelValue 变化
+watch(() => props.modelValue, (newValue) => {
+  if (newValue && newValue !== activeItem.value) {
+    activeItem.value = newValue
+  }
+})
 
 // 从 store 加载导航项
 const navItems = computed(() => 
@@ -65,6 +75,7 @@ const navItems = computed(() =>
 const handleNavClick = (item: NavItem) => {
   activeItem.value = item.id
   emit('navClick', item)
+  emit('update:modelValue', item.id)  // 支持 v-model
 }
 
 // 加载数据

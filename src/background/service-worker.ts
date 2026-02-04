@@ -139,6 +139,14 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (tab?.windowId) {
         try {
           await chrome.sidePanel.open({ windowId: tab.windowId });
+          
+          // 如果有 vendorId，存储到 storage 供侧边栏读取
+          if (message.vendorId) {
+            await chrome.storage.local.set({ 
+              activeSidePanelVendorId: message.vendorId 
+            })
+          }
+          
           sendResponse({ success: true });
         } catch (error) {
           console.error("打开侧边栏失败:", error);

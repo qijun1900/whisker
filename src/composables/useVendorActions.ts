@@ -48,14 +48,21 @@ export function useVendorActions() {
   }
 
   /**
-   * 查看对话
-   * @param id 模型ID
+   * 查看对话（打开侧边栏）
+   * @param id 网站ID
    */
-  const handleCheck = (id: string) => {
+  const handleCheck = async (id: string) => {
     const vendor = vendorStore.getVendorById(id)
     if (vendor) {
-      console.log('查看对话模型:', vendor)
-      // TODO: 实现查看对话功能
+      try {
+        // 发送消息给 background 打开侧边栏并传递 id
+        await chrome.runtime.sendMessage({
+          action: 'openSidePanel',
+          vendorId: id
+        })
+      } catch (error) {
+        console.error('发送消息失败:', error)
+      }
     }
   }
 
