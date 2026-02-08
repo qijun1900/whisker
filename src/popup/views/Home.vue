@@ -24,6 +24,7 @@
         :animated="searchQuery ? false :true"
       />
     </PopupContent>
+    
     <PopupFooter />
   </div>
 </template>

@@ -1,28 +1,36 @@
 <template>
   <div class="side-header">
     <div class="header-content">
-      <h2 class="title">{{ title }}</h2>
-      <div class="actions">
-        <slot name="actions"></slot>
-      </div>
+      <WInput 
+        v-model="searchText" 
+        placeholder="搜索内容 ..."
+        :show-search-icon="true"
+        :clearable="true"
+        shape="round"
+        @update:model-value="handleSearch"
+
+        />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-interface Props {
-  title?: string
-}
+import { ref } from 'vue'
+import WInput from '../../components/WInput.vue';
 
-withDefaults(defineProps<Props>(), {
-  title: 'AI 模型'
-})
+const searchText = ref<string>('');
+
+const handleSearch = (value: string) => {
+  console.log('搜索内容:', value)
+}
+  
+
 </script>
 
 <style scoped>
 .side-header {
-  flex-shrink: 0; /* 防止被压缩 */
-  padding: 16px 20px;
+  flex-shrink: 0;
+  padding: 8px 10px;
   border-bottom: 1px solid #e5e7eb;
   background: #fff;
 }
@@ -31,17 +39,5 @@ withDefaults(defineProps<Props>(), {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
 }
 </style>

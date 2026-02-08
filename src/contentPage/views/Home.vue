@@ -1,13 +1,7 @@
 <template>
   <div class="home">
     <div class="main-container">
-      <SideHeader :title="msg">
-        <template #actions>
-          <button v-if="activeVendorId" class="btn-refresh" @click="handleRefresh">
-            刷新
-          </button>
-        </template>
-      </SideHeader>
+      <SideHeader/>
 
       <SideContent>
         <div v-if="activeVendorId" class="vendor-info">
@@ -19,10 +13,7 @@
         </div>
       </SideContent>
 
-      <SideFooter>
-        <span>Whisker Extension</span>
-        <span v-if="activeVendorId">已激活</span>
-      </SideFooter>
+      <SideFooter />
     </div>
     
     <RightNav 
@@ -49,11 +40,6 @@ const handleNavClick = (item: NavItem) => {
   activeVendorId.value = item.id
   msg.value = item.title
 }
-
-const handleRefresh = () => {
-  console.log('刷新当前模型:', activeVendorId.value)
-  // 这里可以添加刷新逻辑
-}
 </script>
 
 <style scoped>
@@ -73,9 +59,10 @@ const handleRefresh = () => {
   margin-right: 63px; /* 为右侧导航栏留出空间 */
 }
 
+
 .vendor-info {
   background: #fff;
-  padding: 20px;
+  padding: 14px;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -105,21 +92,5 @@ const handleRefresh = () => {
   height: 100%;
   color: #9ca3af;
   font-size: 14px;
-}
-
-.btn-refresh {
-  padding: 6px 12px;
-  font-size: 14px;
-  color: #3b82f6;
-  background: transparent;
-  border: 1px solid #3b82f6;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-refresh:hover {
-  background: #3b82f6;
-  color: #fff;
 }
 </style>
